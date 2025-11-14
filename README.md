@@ -245,9 +245,41 @@ The specification defines many advanced features not yet implemented:
 - Full standard library
 - Beat-gated execution loops
 
-## Contributing
+## Contributing to Language Development
 
-Contributions are welcome! Areas for contribution:
+Contributions are welcome! HaackLang provides an **AI-powered coding assistant** (ClaudeHaackLang Agent) to help you contribute effectively to language development.
+
+### Using the AI Agent for Development
+
+The ClaudeHaackLang Agent can help you:
+
+- Understand the compiler architecture and codebase
+- Implement new language features from the specification
+- Write comprehensive tests for your contributions
+- Debug complex issues in the compiler
+- Generate documentation and examples
+
+**Quick Start:**
+```bash
+# Install dependencies
+pip install -r requirements.txt
+
+# Set up your API key (get one at https://console.anthropic.com/)
+export ANTHROPIC_API_KEY='your-api-key-here'
+
+# Get help implementing a feature
+python claude_haacklang_agent.py -q "How do I implement rhythmic operators in the interpreter?"
+
+# Generate code for a feature
+python claude_haacklang_agent.py -g "Implement the @meta coherence operator"
+
+# Interactive development mode
+python claude_haacklang_agent.py
+```
+
+See **[CONTRIBUTING.md](CONTRIBUTING.md)** for detailed guidance on using the AI agent for language development, and **[docs/AGENT.md](docs/AGENT.md)** for complete agent documentation.
+
+### Contribution Areas
 
 - Implementing additional language features from the specification
 - Writing more example programs
@@ -255,6 +287,17 @@ Contributions are welcome! Areas for contribution:
 - Adding unit tests
 - Optimizing the interpreter
 - Documentation improvements
+
+### Language Specification
+
+The complete HaackLang specification is available in **[readme/specifications.md](readme/specifications.md)**, covering:
+
+- Philosophical foundations (Susan Haack's logical pluralism)
+- Formal semantics and grammar (EBNF)
+- Core language features (Tracks, BoolRhythm, Contexts)
+- HLVM bytecode specification
+- Standard library definitions
+- Advanced features and future enhancements
 
 ## License
 
@@ -275,5 +318,6 @@ It's a language built for **minds**, not machines.
 ## References
 
 - Susan Haack, *Philosophy of Logics* (1978)
-- HaackLang specification document (`haack_lang_specification.md`)
-- HaackLang whitepaper (`HaackLang - A Polyrhythmic Programming Language.pdf`)
+- HaackLang language specification: [readme/specifications.md](readme/specifications.md)
+- HaackLang whitepaper: [HaackLang - A Polyrhythmic Programming Language.pdf](HaackLang%20-%20A%20Polyrhythmic%20Programming%20Language.pdf)
+- AI Coding Assistant documentation: [docs/AGENT.md](docs/AGENT.md)
