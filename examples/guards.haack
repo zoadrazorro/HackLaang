@@ -1,0 +1,23 @@
+# Guard Example
+# Demonstrates rhythmic guards - code that only executes on certain tracks
+
+track main period 1 using classical
+track slow period 4 using fuzzy
+track syncop period 7 using paraconsistent
+
+tv fear = 0.0
+tv counter = 0.0
+
+# This guard only executes when main track fires (every beat)
+guard main fear > 0.5 {
+    print(fear)
+}
+
+# This guard only executes when slow track fires (every 4 beats)
+guard slow counter > 0.3 {
+    print(counter)
+}
+
+# Set values
+fear.main = 0.8
+counter.slow = 0.5
