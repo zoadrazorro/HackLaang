@@ -1,0 +1,29 @@
+# Polylogical Operations Example
+# Demonstrates how logical operators work differently across tracks
+
+# Define tracks
+track main period 1 using classical
+track slow period 4 using fuzzy
+track syncop period 7 using paraconsistent
+
+# Create truth values
+tv danger = 0.7
+tv safety = 0.4
+
+# Polylogical AND operation
+# This will use classical AND on main, fuzzy AND on slow, etc.
+tv assessment = 0.0
+
+# Set track-specific values
+danger.main = 0.9
+danger.slow = 0.7
+danger.syncop = 0.5
+
+safety.main = 0.3
+safety.slow = 0.6
+safety.syncop = 0.8
+
+# Compute AND across tracks (each uses its own logic)
+assessment = danger and safety
+
+print(assessment)

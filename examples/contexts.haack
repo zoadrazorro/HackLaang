@@ -1,0 +1,20 @@
+# Context Example
+# Demonstrates cognitive contexts with different logic modes
+
+track main period 1 using classical
+track slow period 4 using fuzzy
+
+# Context for perception (fast, crisp)
+context perception using logic classical {
+    tv threat = 0.8
+    print(threat)
+}
+
+# Context for deliberation (slow, fuzzy)
+context deliberation using logic fuzzy {
+    tv confidence = 0.6
+    tv doubt = 0.3
+    
+    tv decision = confidence and not doubt
+    print(decision)
+}

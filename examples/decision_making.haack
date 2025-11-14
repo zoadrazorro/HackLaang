@@ -1,0 +1,149 @@
+# Decision Making Under Uncertainty
+# A comprehensive example demonstrating HaackLang's cognitive modeling capabilities
+#
+# This program models a complex decision-making scenario where:
+# - Immediate perceptions (classical logic, main track)
+# - Deliberate reasoning (fuzzy logic, slow track)  
+# - Intuition/subconscious (paraconsistent logic, syncop track)
+# All contribute to a final decision
+
+# ============================================================================
+# TRACK DEFINITIONS
+# ============================================================================
+
+# Main track: Immediate sensory perception (period=1, fires every beat)
+# Uses classical logic for crisp, binary perceptions
+track main period 1 using classical
+
+# Slow track: Deliberate cognitive reasoning (period=4, fires every 4 beats)
+# Uses fuzzy logic for gradual belief formation and uncertainty handling
+track slow period 4 using fuzzy
+
+# Syncop track: Intuitive/subconscious processing (period=7, fires every 7 beats)
+# Uses paraconsistent logic to handle contradictory intuitions
+track syncop period 7 using paraconsistent
+
+# ============================================================================
+# ENVIRONMENTAL INPUTS
+# ============================================================================
+
+tv weather_good = 0.0
+tv traffic_light = 0.0
+tv time_pressure = 0.0
+
+# Initialize environmental conditions with track-specific values
+# Main: Immediate perception
+weather_good.main = 0.8      # Looks sunny
+traffic_light.main = 1.0     # Light is green
+time_pressure.main = 0.9     # Clock shows we're late
+
+# Slow: Deliberate assessment
+weather_good.slow = 0.6      # Forecast uncertain
+traffic_light.slow = 0.7     # Light was green, might change
+time_pressure.slow = 0.7     # Have some buffer time
+
+# Syncop: Intuitive feeling
+weather_good.syncop = 0.4    # Feels like rain coming
+traffic_light.syncop = 0.5   # Ambiguous feeling
+time_pressure.syncop = 0.8   # Gut says hurry
+
+# ============================================================================
+# INTERNAL COGNITIVE STATES
+# ============================================================================
+
+tv urgency = 0.0
+tv safety = 0.0
+tv comfort = 0.0
+
+# Urgency: Driven by time pressure
+urgency = time_pressure
+
+# Safety: Combination of traffic and weather
+safety = traffic_light and weather_good
+
+# Comfort: Weather without time pressure
+comfort = weather_good and not time_pressure
+
+# ============================================================================
+# CONTEXT: DRIVING DECISION
+# ============================================================================
+
+context driving_decision using logic fuzzy {
+    # Decision variables
+    tv should_go = 0.0
+    tv should_wait = 0.0
+    tv caution_level = 0.0
+    
+    # Go decision: high safety AND high urgency
+    should_go = safety and urgency
+    
+    # Wait decision: low safety OR low urgency
+    should_wait = not safety or not urgency
+    
+    # Caution: inverse of comfort
+    caution_level = not comfort
+    
+    # Output the decision state
+    print(should_go)
+    print(should_wait)
+    print(caution_level)
+}
+
+# ============================================================================
+# CONTEXT: EMOTIONAL STATE
+# ============================================================================
+
+context emotional using logic fuzzy {
+    tv anxiety = 0.0
+    tv confidence = 0.0
+    
+    # Anxiety from time pressure without safety
+    anxiety = time_pressure and not safety
+    
+    # Confidence from safety and good conditions
+    confidence = safety and weather_good
+    
+    print(anxiety)
+    print(confidence)
+}
+
+# ============================================================================
+# FUNCTION: RISK ASSESSMENT
+# ============================================================================
+
+fn assess_risk(threat, resources) {
+    # Risk is high when threat is high and resources are low
+    let risk = threat and not resources
+    return risk
+}
+
+tv overall_risk = assess_risk(time_pressure, safety)
+print(overall_risk)
+
+# ============================================================================
+# RESULTS INTERPRETATION
+# ============================================================================
+#
+# The output shows how the same decision variables evolve differently across
+# the three logical tracks:
+#
+# Main track (classical):
+#   - Binary decisions: go or don't go
+#   - Fast reactions to immediate stimuli
+#   - No ambiguity
+#
+# Slow track (fuzzy):
+#   - Gradual certainty [0,1]
+#   - Balanced consideration of factors
+#   - Reflects deliberate reasoning
+#
+# Syncop track (paraconsistent):
+#   - Can hold contradictory beliefs
+#   - Intuitive "gut feelings"
+#   - Subconscious processing
+#
+# This polylogical, polyrhythmic approach models how real human decision-making
+# works: multiple cognitive processes operating at different speeds with
+# different logical frameworks, all contributing to behavior.
+#
+# ============================================================================

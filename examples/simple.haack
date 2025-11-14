@@ -1,0 +1,22 @@
+# Simple HaackLang Example
+# Demonstrates basic tracks and truth values
+
+# Define tracks with different periods and logics
+track main period 1 using classical
+track slow period 4 using fuzzy
+track syncop period 7 using paraconsistent
+
+# Declare truth values
+tv fear = 0.3
+tv courage = 0.7
+
+# Simple expressions
+tv result = 0.5
+
+# Assignment to specific tracks
+fear.main = 0.8
+courage.slow = 0.6
+
+# Print results
+print(fear)
+print(courage)

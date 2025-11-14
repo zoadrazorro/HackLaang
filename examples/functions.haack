@@ -1,0 +1,19 @@
+# Functions Example
+# Demonstrates function definitions and calls
+
+track main period 1 using classical
+track slow period 4 using fuzzy
+
+# Define a function to blend two truth values
+fn blend(a, b) {
+    let result = a and b
+    return result
+}
+
+# Define truth values
+tv trust = 0.7
+tv hope = 0.8
+
+# Call the function
+tv outcome = blend(trust, hope)
+print(outcome)

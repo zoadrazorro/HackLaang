@@ -1,0 +1,56 @@
+# Fear Response Model
+# A demonstration of HaackLang's cognitive modeling capabilities
+# Models how fear, courage, and decision-making interact across different logical tracks
+
+# Define tracks representing different cognitive speeds
+track main period 1 using classical      # Immediate perception
+track slow period 4 using fuzzy          # Deliberate reasoning  
+track syncop period 7 using paraconsistent  # Intuitive/subconscious
+
+# Environmental inputs
+tv threat_detected = 0.8     # External threat level
+tv resources_available = 0.6  # Available resources for response
+
+# Internal states
+tv fear = 0.0
+tv courage = 0.0
+tv confidence = 0.0
+
+# Set initial track-specific values
+# Main track: crisp, immediate perception
+threat_detected.main = 0.9
+resources_available.main = 0.7
+
+# Slow track: gradual belief formation
+threat_detected.slow = 0.7
+resources_available.slow = 0.6
+
+# Syncop track: intuitive assessment (possibly contradictory)
+threat_detected.syncop = 0.5
+resources_available.syncop = 0.8
+
+# Fear response: high threat AND low resources
+fear = threat_detected and not resources_available
+
+# Courage: belief in resources despite threat
+courage = resources_available and not threat_detected
+
+# Confidence is based on courage
+confidence = courage
+
+# Context: fight-or-flight decision making
+context decision using logic fuzzy {
+    tv should_flee = 0.0
+    tv should_fight = 0.0
+    
+    # Flee if fear is high
+    should_flee = fear
+    
+    # Fight if courage is high
+    should_fight = courage
+}
+
+# Display results
+print(fear)
+print(courage)
+print(confidence)
