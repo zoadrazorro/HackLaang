@@ -27,6 +27,9 @@ cd HackLaang
 # The compiler is pure Python with no external dependencies
 # Add to your PATH or run directly
 export PATH="$PATH:$(pwd)/src"
+
+# Optional: Install ClaudeHackLang Agent (AI coding assistant)
+pip install -r requirements.txt
 ```
 
 ## Quick Start
@@ -164,6 +167,35 @@ python3 src/haackc/main.py --lex-only program.haack
 # Parse only (output AST)
 python3 src/haackc/main.py --parse-only program.haack
 ```
+
+## AI Coding Assistant
+
+HaackLang includes an intelligent AI coding assistant powered by Claude (Anthropic). The ClaudeHackLang Agent can help you:
+- Write HaackLang code from natural language descriptions
+- Debug and fix errors in your programs
+- Explain complex polylogical concepts
+- Analyze existing code
+- Learn from interactive examples
+
+**Quick Start:**
+```bash
+# Set up your API key
+export ANTHROPIC_API_KEY='your-api-key-here'
+
+# Launch interactive mode
+python claude_haacklang_agent.py
+
+# Or ask a quick question
+python claude_haacklang_agent.py -q "How do I use fuzzy logic in HaackLang?"
+
+# Generate code
+python claude_haacklang_agent.py -g "Create a program that models threat assessment"
+
+# Analyze a file
+python claude_haacklang_agent.py -a examples/simple.haack
+```
+
+**See [docs/AGENT.md](docs/AGENT.md) for complete documentation.**
 
 ## Architecture
 

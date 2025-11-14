@@ -1,0 +1,7 @@
+# ClaudeHackLang Agent Dependencies
+
+# Anthropic Claude API client
+anthropic>=0.39.0
+
+# Optional: For enhanced .env file support
+python-dotenv>=1.0.0
