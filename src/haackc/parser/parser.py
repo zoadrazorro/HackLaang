@@ -8,49 +8,122 @@ from .ast_nodes import *
 
 
 class Parser:
-    """Recursive descent parser for HaackLang."""
+    """
+    A recursive descent parser for the HaackLang programming language.
+
+    The parser takes a list of tokens from the lexer and builds an Abstract
+    Syntax Tree (AST) that represents the structure of the program.
+
+    Attributes:
+        tokens (List[Token]): The list of tokens to be parsed.
+        pos (int): The current position in the token list.
+    """
     
     def __init__(self, tokens: List[Token]):
+        """
+        Initializes the Parser with a list of tokens.
+
+        Args:
+            tokens (List[Token]): The tokens to be parsed.
+        """
         self.tokens = tokens
         self.pos = 0
     
     def error(self, message: str):
-        """Raise a parser error."""
+        """
+        Raises a parser error.
+
+        Args:
+            message (str): The error message to be raised.
+
+        Raises:
+            SyntaxError: Always raises a SyntaxError with the given message.
+        """
         token = self.current()
         raise SyntaxError(f"Parse error at {token.line}:{token.column}: {message}")
     
     def current(self) -> Token:
-        """Get current token."""
+        """
+        Gets the current token.
+
+        Returns:
+            Token: The current token, or the EOF token if the end of the
+                token list has been reached.
+        """
         if self.pos < len(self.tokens):
             return self.tokens[self.pos]
         return self.tokens[-1]  # EOF
     
     def peek(self, offset: int = 0) -> Token:
-        """Look ahead at token."""
+        """
+        Looks ahead at a token without consuming it.
+
+        Args:
+            offset (int): The offset from the current position.
+
+        Returns:
+            Token: The token at the specified position, or the EOF token if
+                the position is out of bounds.
+        """
         pos = self.pos + offset
         if pos < len(self.tokens):
             return self.tokens[pos]
         return self.tokens[-1]
     
     def advance(self) -> Token:
-        """Consume and return current token."""
+        """
+        Consumes and returns the current token.
+
+        This method moves the parser's position forward by one token.
+
+        Returns:
+            Token: The token that was consumed.
+        """
         token = self.current()
         if token.type != TokenType.EOF:
             self.pos += 1
         return token
     
     def match(self, *types: TokenType) -> bool:
-        """Check if current token matches any of the given types."""
+        """
+        Checks if the current token matches any of the given types.
+
+        Args:
+            *types (TokenType): The token types to match against.
+
+        Returns:
+            bool: True if the current token's type is in the given types,
+                False otherwise.
+        """
         return self.current().type in types
     
     def expect(self, token_type: TokenType) -> Token:
-        """Consume token of expected type or raise error."""
+        """
+        Consumes a token of the expected type or raises an error.
+
+        Args:
+            token_type (TokenType): The expected type of the token.
+
+        Returns:
+            Token: The consumed token if it matches the expected type.
+
+        Raises:
+            SyntaxError: If the current token does not match the expected type.
+        """
         if not self.match(token_type):
             self.error(f"Expected {token_type.name}, got {self.current().type.name}")
         return self.advance()
     
     def parse(self) -> Program:
-        """Parse a complete program."""
+        """
+        Parses a complete HaackLang program.
+
+        This method iterates through the tokens and parses top-level declarations
+        until the end of the file is reached.
+
+        Returns:
+            Program: The root of the AST, representing the entire program.
+        """
         declarations = []
         
         while not self.match(TokenType.EOF):
@@ -61,7 +134,16 @@ class Parser:
         return Program(declarations=declarations)
     
     def parse_declaration(self) -> Optional[ASTNode]:
-        """Parse a top-level declaration."""
+        """
+        Parses a top-level declaration.
+
+        This method determines the type of declaration and calls the
+        appropriate parsing method.
+
+        Returns:
+            Optional[ASTNode]: The parsed declaration node, or None if no
+                declaration is found.
+        """
         token = self.current()
         
         if self.match(TokenType.TRACK):
@@ -78,7 +160,14 @@ class Parser:
             return self.parse_statement()
     
     def parse_track_decl(self) -> TrackDecl:
-        """Parse track declaration: track name period N [phase M] [using logic]."""
+        """
+        Parses a track declaration.
+
+        Syntax: track <name> period <N> [phase <M>] [using <logic>]
+
+        Returns:
+            TrackDecl: The parsed track declaration node.
+        """
         track_token = self.expect(TokenType.TRACK)
         name_token = self.expect(TokenType.IDENTIFIER)
         name = name_token.value
@@ -118,7 +207,14 @@ class Parser:
         )
     
     def parse_context_decl(self) -> ContextDecl:
-        """Parse context declaration: context name { body }."""
+        """
+        Parses a context declaration.
+
+        Syntax: context <name> [using logic <logic> | using track <track>] { <body> }
+
+        Returns:
+            ContextDecl: The parsed context declaration node.
+        """
         context_token = self.expect(TokenType.CONTEXT)
         name_token = self.expect(TokenType.IDENTIFIER)
         name = name_token.value
@@ -165,7 +261,14 @@ class Parser:
         )
     
     def parse_truthvalue_decl(self) -> TruthValueDecl:
-        """Parse truth value declaration: tv name [= value]."""
+        """
+        Parses a truth value declaration.
+
+        Syntax: tv <name> [= <value>]
+
+        Returns:
+            TruthValueDecl: The parsed truth value declaration node.
+        """
         tv_token = self.advance()  # TV or TRUTHVALUE
         name_token = self.expect(TokenType.IDENTIFIER)
         name = name_token.value
@@ -183,7 +286,14 @@ class Parser:
         )
     
     def parse_rule_decl(self) -> RuleDecl:
-        """Parse rule declaration: rule name { body }."""
+        """
+        Parses a rule declaration.
+
+        Syntax: rule <name> { <body> }
+
+        Returns:
+            RuleDecl: The parsed rule declaration node.
+        """
         rule_token = self.expect(TokenType.RULE)
         name_token = self.expect(TokenType.IDENTIFIER)
         name = name_token.value
@@ -206,7 +316,14 @@ class Parser:
         )
     
     def parse_function_decl(self) -> FunctionDecl:
-        """Parse function declaration: fn name(params) { body }."""
+        """
+        Parses a function declaration.
+
+        Syntax: fn <name>(<params>) { <body> }
+
+        Returns:
+            FunctionDecl: The parsed function declaration node.
+        """
         fn_token = self.expect(TokenType.FN)
         name_token = self.expect(TokenType.IDENTIFIER)
         name = name_token.value
@@ -240,7 +357,16 @@ class Parser:
         )
     
     def parse_statement(self) -> Optional[ASTNode]:
-        """Parse a statement."""
+        """
+        Parses a statement.
+
+        This method determines the type of statement and calls the
+        appropriate parsing method.
+
+        Returns:
+            Optional[ASTNode]: The parsed statement node, or None if no
+                statement is found.
+        """
         if self.match(TokenType.IF):
             return self.parse_if_statement()
         elif self.match(TokenType.GUARD):
@@ -258,7 +384,14 @@ class Parser:
             return ExpressionStatement(expression=expr, line=expr.line, column=expr.column)
     
     def parse_if_statement(self) -> IfStatement:
-        """Parse if statement: if condition { body } [else { body }]."""
+        """
+        Parses an if statement.
+
+        Syntax: if <condition> { <body> } [else { <body> }]
+
+        Returns:
+            IfStatement: The parsed if statement node.
+        """
         if_token = self.expect(TokenType.IF)
         
         condition = self.parse_expression()
@@ -291,7 +424,14 @@ class Parser:
         )
     
     def parse_guard_statement(self) -> GuardStatement:
-        """Parse guard statement: guard track condition { body }."""
+        """
+        Parses a guard statement.
+
+        Syntax: guard <track> <condition> { <body> }
+
+        Returns:
+            GuardStatement: The parsed guard statement node.
+        """
         guard_token = self.expect(TokenType.GUARD)
         track_token = self.expect(TokenType.IDENTIFIER)
         track = track_token.value
@@ -315,7 +455,14 @@ class Parser:
         )
     
     def parse_return_statement(self) -> ReturnStatement:
-        """Parse return statement: return [expression]."""
+        """
+        Parses a return statement.
+
+        Syntax: return [<expression>]
+
+        Returns:
+            ReturnStatement: The parsed return statement node.
+        """
         return_token = self.expect(TokenType.RETURN)
         
         value = None
@@ -329,7 +476,14 @@ class Parser:
         )
     
     def parse_let_statement(self) -> Assignment:
-        """Parse let statement: let name = expression."""
+        """
+        Parses a let statement.
+
+        Syntax: let <name> = <expression>
+
+        Returns:
+            Assignment: The parsed assignment node.
+        """
         let_token = self.expect(TokenType.LET)
         name_token = self.expect(TokenType.IDENTIFIER)
         name = name_token.value
@@ -346,7 +500,15 @@ class Parser:
         )
     
     def parse_assignment_or_expression(self) -> ASTNode:
-        """Parse assignment or expression statement."""
+        """
+        Parses an assignment or an expression statement.
+
+        This method handles the ambiguity between an assignment and an
+        expression statement by looking ahead for an assignment operator.
+
+        Returns:
+            ASTNode: The parsed assignment or expression statement node.
+        """
         name_token = self.advance()
         name = name_token.value
         
@@ -386,11 +548,23 @@ class Parser:
             return ExpressionStatement(expression=expr, line=name_token.line, column=name_token.column)
     
     def parse_expression(self) -> Expression:
-        """Parse an expression."""
+        """
+        Parses an expression.
+
+        This method starts the recursive descent parsing of an expression.
+
+        Returns:
+            Expression: The parsed expression node.
+        """
         return self.parse_or_expression()
     
     def parse_or_expression(self) -> Expression:
-        """Parse OR expression."""
+        """
+        Parses an OR expression.
+
+        Returns:
+            Expression: The parsed expression node.
+        """
         left = self.parse_and_expression()
         
         while self.match(TokenType.OR):
@@ -407,7 +581,12 @@ class Parser:
         return left
     
     def parse_and_expression(self) -> Expression:
-        """Parse AND expression."""
+        """
+        Parses an AND expression.
+
+        Returns:
+            Expression: The parsed expression node.
+        """
         left = self.parse_comparison_expression()
         
         while self.match(TokenType.AND):
@@ -424,7 +603,12 @@ class Parser:
         return left
     
     def parse_comparison_expression(self) -> Expression:
-        """Parse comparison expression."""
+        """
+        Parses a comparison expression.
+
+        Returns:
+            Expression: The parsed expression node.
+        """
         left = self.parse_additive_expression()
         
         if self.match(TokenType.EQ, TokenType.NE, TokenType.LT, TokenType.LE, TokenType.GT, TokenType.GE):
@@ -449,7 +633,12 @@ class Parser:
         return left
     
     def parse_additive_expression(self) -> Expression:
-        """Parse addition/subtraction expression."""
+        """
+        Parses an additive expression.
+
+        Returns:
+            Expression: The parsed expression node.
+        """
         left = self.parse_multiplicative_expression()
         
         while self.match(TokenType.PLUS, TokenType.MINUS):
@@ -467,7 +656,12 @@ class Parser:
         return left
     
     def parse_multiplicative_expression(self) -> Expression:
-        """Parse multiplication/division expression."""
+        """
+        Parses a multiplicative expression.
+
+        Returns:
+            Expression: The parsed expression node.
+        """
         left = self.parse_unary_expression()
         
         while self.match(TokenType.MULTIPLY, TokenType.DIVIDE):
@@ -485,7 +679,12 @@ class Parser:
         return left
     
     def parse_unary_expression(self) -> Expression:
-        """Parse unary expression."""
+        """
+        Parses a unary expression.
+
+        Returns:
+            Expression: The parsed expression node.
+        """
         if self.match(TokenType.NOT, TokenType.MINUS):
             op_token = self.advance()
             op = 'not' if op_token.type == TokenType.NOT else '-'
@@ -500,7 +699,18 @@ class Parser:
         return self.parse_primary_expression()
     
     def parse_primary_expression(self) -> Expression:
-        """Parse primary expression."""
+        """
+        Parses a primary expression.
+
+        Primary expressions are the building blocks of other expressions,
+        including literals, variables, and parenthesized expressions.
+
+        Returns:
+            Expression: The parsed expression node.
+
+        Raises:
+            SyntaxError: If an unexpected token is encountered.
+        """
         token = self.current()
         
         # Number
@@ -543,7 +753,17 @@ class Parser:
         self.error(f"Unexpected token in expression: {token.type.name}")
     
     def parse_expression_continuation(self, left: Expression) -> Expression:
-        """Continue parsing expression with left side already parsed."""
+        """
+        Continues parsing an expression with the left side already parsed.
+
+        This method is a placeholder for future extensions to the parser.
+
+        Args:
+            left (Expression): The already parsed left side of the expression.
+
+        Returns:
+            Expression: The parsed expression node.
+        """
         # This handles cases where we've already consumed part of an expression
         # For now, just return left as-is
         return left

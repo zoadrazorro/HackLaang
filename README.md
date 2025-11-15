@@ -25,33 +25,56 @@ git clone https://github.com/zoadrazorro/HackLaang.git
 cd HackLaang
 
 # The compiler is pure Python with no external dependencies
-# Add to your PATH or run directly
+# You can run the compiler directly using python3 src/haackc/main.py <file>.
+# Alternatively, you can add the src directory to your PATH:
 export PATH="$PATH:$(pwd)/src"
 
 # Optional: Install ClaudeHackLang Agent (AI coding assistant)
 pip install -r requirements.txt
 ```
 
-## Quick Start
+## Getting Started
 
-Create a simple HaackLang program (`hello.haack`):
+This section provides a brief introduction to writing and running HaackLang programs.
+
+### Your First HaackLang Program
+
+Create a file named `hello.haack` and add the following code:
 
 ```haack
-# Define tracks with different periods and logics
+# Define a track that fires on every beat using classical logic.
 track main period 1 using classical
+
+# Define a slower track that fires every 4 beats using fuzzy logic.
 track slow period 4 using fuzzy
 
-# Declare a truth value
+# Declare a TruthValue (a multi-track variable) and initialize it.
+# This sets the value of 'greeting' to 0.8 on all tracks.
 tv greeting = 0.8
 
-# Print it
+# On the 'main' track, the value will be treated as 1.0 (true)
+# because classical logic rounds to the nearest integer.
+# On the 'slow' track, the value remains 0.8 due to fuzzy logic.
+
+# Print the TruthValue to the console.
+# This will display the values of 'greeting' on all tracks.
 print(greeting)
 ```
 
-Run it:
+### Running the Program
+
+You can run the program using the HaackLang compiler:
 
 ```bash
 python3 src/haackc/main.py hello.haack
+```
+
+### Expected Output
+
+The output will show the state of the `greeting` TruthValue across all defined tracks:
+
+```
+TruthValue({main: 1.00, slow: 0.80, syncop: 0.80})
 ```
 
 ## Language Features

@@ -10,9 +10,24 @@ from ..runtime.context import Context
 
 
 class Interpreter:
-    """Interprets HaackLang AST."""
+    """
+    Interprets a HaackLang Abstract Syntax Tree (AST).
+
+    The interpreter walks the AST and executes the program's logic, managing
+    state such as tracks, contexts, variables, and truth values.
+
+    Attributes:
+        tracks (Dict[str, Track]): A dictionary of declared tracks.
+        contexts (Dict[str, Context]): A dictionary of declared contexts.
+        variables (Dict[str, Any]): A dictionary for global and local variables.
+        truthvalues (Dict[str, TruthValue]): A dictionary of truth value variables.
+        global_beat (int): The global beat counter for the interpreter.
+        current_context (Optional[Context]): The currently active context.
+        functions (Dict[str, FunctionDecl]): A dictionary of user-defined functions.
+    """
     
     def __init__(self):
+        """Initializes the Interpreter and its default state."""
         self.tracks: Dict[str, Track] = {}
         self.contexts: Dict[str, Context] = {}
         self.variables: Dict[str, Any] = {}
@@ -31,18 +46,46 @@ class Interpreter:
         self.tracks['syncop'] = Track('syncop', period=7, phase=0, logic=RuntimeLogicType.PARACONSISTENT)
     
     def error(self, message: str, node: Optional[ASTNode] = None):
-        """Raise an interpreter error."""
+        """
+        Raises an interpreter error.
+
+        Args:
+            message (str): The error message to be raised.
+            node (Optional[ASTNode]): The AST node associated with the error.
+
+        Raises:
+            RuntimeError: Always raises a RuntimeError with the given message.
+        """
         if node:
             raise RuntimeError(f"Runtime error at {node.line}:{node.column}: {message}")
         raise RuntimeError(f"Runtime error: {message}")
     
     def interpret(self, program: Program):
-        """Interpret a program."""
+        """
+        Interprets a HaackLang program.
+
+        This method serves as the entry point for interpreting a program. It
+        iterates through the top-level declarations in the AST and executes them.
+
+        Args:
+            program (Program): The root of the AST to be interpreted.
+        """
         for decl in program.declarations:
             self.execute_declaration(decl)
     
     def execute_declaration(self, node: ASTNode):
-        """Execute a top-level declaration."""
+        """
+        Executes a top-level declaration.
+
+        This method dispatches to the appropriate execution method based on the
+        type of the AST node.
+
+        Args:
+            node (ASTNode): The declaration node to be executed.
+
+        Raises:
+            RuntimeError: If an unknown declaration type is encountered.
+        """
         if isinstance(node, TrackDecl):
             self.execute_track_decl(node)
         elif isinstance(node, ContextDecl):
@@ -65,7 +108,12 @@ class Interpreter:
             self.error(f"Unknown declaration type: {type(node).__name__}", node)
     
     def execute_track_decl(self, node: TrackDecl):
-        """Execute track declaration."""
+        """
+        Executes a track declaration.
+
+        Args:
+            node (TrackDecl): The track declaration node to be executed.
+        """
         logic_map = {
             LogicType.CLASSICAL: RuntimeLogicType.CLASSICAL,
             LogicType.FUZZY: RuntimeLogicType.FUZZY,
@@ -81,7 +129,12 @@ class Interpreter:
         self.tracks[node.name] = track
     
     def execute_context_decl(self, node: ContextDecl):
-        """Execute context declaration."""
+        """
+        Executes a context declaration.
+
+        Args:
+            node (ContextDecl): The context declaration node to be executed.
+        """
         logic_map = {
             LogicType.CLASSICAL: RuntimeLogicType.CLASSICAL,
             LogicType.FUZZY: RuntimeLogicType.FUZZY,
@@ -106,7 +159,12 @@ class Interpreter:
         self.current_context = old_context
     
     def execute_truthvalue_decl(self, node: TruthValueDecl):
-        """Execute truth value declaration."""
+        """
+        Executes a truth value declaration.
+
+        Args:
+            node (TruthValueDecl): The truth value declaration node to be executed.
+        """
         initial_val = 0.0
         if node.initial_value:
             result = self.evaluate_expression(node.initial_value)
@@ -121,7 +179,12 @@ class Interpreter:
         self.truthvalues[node.name] = tv
     
     def execute_rule_decl(self, node: RuleDecl):
-        """Execute rule declaration."""
+        """
+        Executes a rule declaration.
+
+        Args:
+            node (RuleDecl): The rule declaration node to be executed.
+        """
         # For now, rules are executed immediately
         # In a full implementation, rules would be stored and evaluated on each beat
         for stmt in node.body:
@@ -129,7 +192,12 @@ class Interpreter:
                 self.execute_declaration(stmt)
     
     def execute_assignment(self, node: Assignment):
-        """Execute assignment."""
+        """
+        Executes an assignment.
+
+        Args:
+            node (Assignment): The assignment node to be executed.
+        """
         value = self.evaluate_expression(node.value)
         
         # Check if it's a track-qualified assignment
@@ -151,7 +219,12 @@ class Interpreter:
                 self.variables[node.target] = value
     
     def execute_if_statement(self, node: IfStatement):
-        """Execute if statement."""
+        """
+        Executes an if statement.
+
+        Args:
+            node (IfStatement): The if statement node to be executed.
+        """
         condition = self.evaluate_expression(node.condition)
         
         # Convert condition to boolean
@@ -170,7 +243,15 @@ class Interpreter:
                 self.execute_declaration(stmt)
     
     def execute_guard_statement(self, node: GuardStatement):
-        """Execute guard statement - only if specified track is active."""
+        """
+        Executes a guard statement.
+
+        The body of the guard statement is only executed if the specified track
+        is active on the current global beat.
+
+        Args:
+            node (GuardStatement): The guard statement node to be executed.
+        """
         if node.track not in self.tracks:
             self.error(f"Unknown track: {node.track}", node)
         
@@ -195,7 +276,21 @@ class Interpreter:
                 self.execute_declaration(stmt)
     
     def evaluate_expression(self, node: Expression) -> Any:
-        """Evaluate an expression."""
+        """
+        Evaluates an expression.
+
+        This method dispatches to the appropriate evaluation method based on the
+        type of the AST node.
+
+        Args:
+            node (Expression): The expression node to be evaluated.
+
+        Returns:
+            Any: The result of the expression evaluation.
+
+        Raises:
+            RuntimeError: If an unknown expression type is encountered.
+        """
         if isinstance(node, NumberLiteral):
             return node.value
         
@@ -218,7 +313,18 @@ class Interpreter:
             self.error(f"Unknown expression type: {type(node).__name__}", node)
     
     def evaluate_variable(self, node: Variable) -> Any:
-        """Evaluate a variable reference."""
+        """
+        Evaluates a variable reference.
+
+        Args:
+            node (Variable): The variable node to be evaluated.
+
+        Returns:
+            Any: The value of the variable.
+
+        Raises:
+            RuntimeError: If the variable is not defined.
+        """
         name = node.name
         
         # Check if it's a track-qualified reference
@@ -240,7 +346,18 @@ class Interpreter:
             self.error(f"Undefined variable: {name}", node)
     
     def evaluate_binary_op(self, node: BinaryOp) -> Any:
-        """Evaluate binary operation."""
+        """
+        Evaluates a binary operation.
+
+        Args:
+            node (BinaryOp): The binary operation node to be evaluated.
+
+        Returns:
+            Any: The result of the binary operation.
+
+        Raises:
+            RuntimeError: If an unknown operator is encountered.
+        """
         left = self.evaluate_expression(node.left)
         right = self.evaluate_expression(node.right)
         
@@ -281,7 +398,17 @@ class Interpreter:
             self.error(f"Unknown operator: {node.operator}", node)
     
     def evaluate_logical_op(self, op: str, left: Any, right: Any) -> Any:
-        """Evaluate logical operation with polylogical semantics."""
+        """
+        Evaluates a logical operation with polylogical semantics.
+
+        Args:
+            op (str): The logical operator ('and' or 'or').
+            left (Any): The left operand.
+            right (Any): The right operand.
+
+        Returns:
+            Any: The result of the logical operation.
+        """
         # If both operands are TruthValues, apply track-wise operations
         if isinstance(left, TruthValue) and isinstance(right, TruthValue):
             result = TruthValue(self.tracks)
@@ -307,7 +434,18 @@ class Interpreter:
         return result
     
     def evaluate_unary_op(self, node: UnaryOp) -> Any:
-        """Evaluate unary operation."""
+        """
+        Evaluates a unary operation.
+
+        Args:
+            node (UnaryOp): The unary operation node to be evaluated.
+
+        Returns:
+            Any: The result of the unary operation.
+
+        Raises:
+            RuntimeError: If an unknown unary operator is encountered.
+        """
         operand = self.evaluate_expression(node.operand)
         
         if node.operator == 'not':
@@ -331,7 +469,18 @@ class Interpreter:
             self.error(f"Unknown unary operator: {node.operator}", node)
     
     def evaluate_function_call(self, node: FunctionCall) -> Any:
-        """Evaluate function call."""
+        """
+        Evaluates a function call.
+
+        Args:
+            node (FunctionCall): The function call node to be evaluated.
+
+        Returns:
+            Any: The return value of the function.
+
+        Raises:
+            RuntimeError: If an unknown function is called.
+        """
         # Built-in functions
         if node.name == 'print':
             args = [self.evaluate_expression(arg) for arg in node.args]
@@ -383,7 +532,12 @@ class Interpreter:
         return TruthValue(self.tracks, val)
     
     def advance_beat(self):
-        """Advance the global beat counter."""
+        """
+        Advances the global beat counter by one.
+
+        This method increments the global beat and notifies all tracks to
+        advance their internal state.
+        """
         self.global_beat += 1
         for track in self.tracks.values():
             track.advance()

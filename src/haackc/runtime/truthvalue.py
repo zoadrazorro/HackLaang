@@ -8,17 +8,28 @@ from .track import Track, LogicType
 
 class TruthValue:
     """
-    Represents a multi-track truth value (BoolRhythm).
-    Each track has its own truth value that can evolve independently.
+    Represents a multi-track truth value, also known as a BoolRhythm.
+
+    Each track within a TruthValue has its own truth value that can evolve
+    independently. This allows for representing complex, polyrhythmic logical states.
+
+    Attributes:
+        tracks (Dict[str, Track]): A dictionary of the tracks that this
+            TruthValue is aware of.
+        values (Dict[str, float]): A dictionary mapping track names to their
+            current truth values.
     """
     
     def __init__(self, tracks: Dict[str, Track], initial_value: Union[float, Dict[str, float]] = 0.0):
         """
-        Initialize a TruthValue.
-        
+        Initializes a TruthValue.
+
         Args:
-            tracks: Dictionary mapping track names to Track objects
-            initial_value: Either a single value for all tracks, or a dict of values per track
+            tracks (Dict[str, Track]): A dictionary mapping track names to
+                Track objects.
+            initial_value (Union[float, Dict[str, float]]): Either a single
+                value to be applied to all tracks, or a dictionary of values
+                for specific tracks.
         """
         self.tracks = tracks
         self.values: Dict[str, float] = {}
@@ -31,11 +42,29 @@ class TruthValue:
                 self.values[track_name] = float(initial_value)
     
     def get(self, track_name: str) -> float:
-        """Get the truth value for a specific track."""
+        """
+        Gets the truth value for a specific track.
+
+        Args:
+            track_name (str): The name of the track to get the value of.
+
+        Returns:
+            float: The truth value of the specified track, or 0.0 if the track
+                does not exist.
+        """
         return self.values.get(track_name, 0.0)
     
     def set(self, track_name: str, value: float):
-        """Set the truth value for a specific track."""
+        """
+        Sets the truth value for a specific track.
+
+        The value is clamped to the appropriate range for the track's logic
+        system ([0, 1] for fuzzy/paraconsistent, {0, 1} for classical).
+
+        Args:
+            track_name (str): The name of the track to set the value of.
+            value (float): The new truth value for the track.
+        """
         if track_name in self.values:
             # Clamp to [0, 1] for fuzzy/paraconsistent, {0, 1} for classical
             track = self.tracks.get(track_name)
@@ -45,18 +74,33 @@ class TruthValue:
                 self.values[track_name] = max(0.0, min(1.0, float(value)))
     
     def set_all(self, value: float):
-        """Set the same value for all tracks."""
+        """
+        Sets the same value for all tracks.
+
+        Args:
+            value (float): The value to set for all tracks.
+        """
         for track_name in self.values:
             self.set(track_name, value)
     
     def to_dict(self) -> Dict[str, float]:
-        """Get all track values as a dictionary."""
+        """
+        Gets all track values as a dictionary.
+
+        Returns:
+            Dict[str, float]: A copy of the internal values dictionary.
+        """
         return self.values.copy()
     
     def to_classical(self) -> bool:
         """
-        Convert to a classical boolean by taking the main track
-        or the average if no main track exists.
+        Converts the TruthValue to a classical boolean.
+
+        This is done by taking the value of the 'main' track, or the average
+        of all tracks if no 'main' track exists.
+
+        Returns:
+            bool: The classical boolean representation of the TruthValue.
         """
         if 'main' in self.values:
             return self.values['main'] >= 0.5
@@ -85,15 +129,18 @@ class TruthValue:
 
 def apply_logic_operator(op: str, logic: LogicType, *operands: float) -> float:
     """
-    Apply a logical operator according to the specified logic type.
-    
+    Applies a logical operator according to the specified logic type.
+
+    This function implements the semantics of 'and', 'or', and 'not' for
+    classical, fuzzy, and paraconsistent logic systems.
+
     Args:
-        op: Operator name ('and', 'or', 'not')
-        logic: Logic type to use
-        operands: Operand values (1 for unary, 2 for binary)
-    
+        op (str): The name of the operator ('and', 'or', 'not').
+        logic (LogicType): The logic system to use for the operation.
+        *operands (float): The operand values (1 for unary, 2 for binary).
+
     Returns:
-        Result value in range [0, 1]
+        float: The result of the logical operation, in the range [0, 1].
     """
     if logic == LogicType.CLASSICAL:
         # Classical boolean logic

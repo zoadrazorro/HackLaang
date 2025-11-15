@@ -13,6 +13,13 @@ from haackc.interpreter import Interpreter
 
 
 def main():
+    """
+    Command-line interface for the HaackLang compiler.
+
+    This function parses command-line arguments to compile and run a HaackLang
+    source file. It handles file reading, lexing, parsing, and interpretation,
+    providing options for verbose output and debugging stages.
+    """
     parser = argparse.ArgumentParser(
         description='HaackLang Reference Compiler - A polyrhythmic, polylogical programming language'
     )
